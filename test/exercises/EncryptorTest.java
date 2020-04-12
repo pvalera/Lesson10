@@ -18,6 +18,9 @@ class EncryptorTest {
 	}
 	
 	// Exercise: decrypt this sentence: Nkxg"nqpi"cpf"rtqurgt#
-	
-	
+	@Test
+	void testDecryptWord() throws Exception {
+		System.out.println(Encryptor.decrypt("Nkxg\"nqpi\"cpf\"rtqurgt#"));
+		assertEquals("Live long and prosper!", Encryptor.decrypt("Nkxg\"nqpi\"cpf\"rtqurgt#"));
+	}
 }
