@@ -19,7 +19,7 @@ public class Hangman extends KeyAdapter {
 	ArrayList<JLabel> boxes = new ArrayList<JLabel>();
 	int lives = 9;
 	JLabel livesLabel = new JLabel("" + lives);
-
+	
 	public static void main(String[] args) {
 		Hangman hangman = new Hangman();
 		hangman.addPuzzles();
@@ -73,8 +73,18 @@ public class Hangman extends KeyAdapter {
 				gotOne = true;
 			}
 		}
-		if (!gotOne)
+		if (!gotOne) {
 			livesLabel.setText("" + --lives);
+			return;
+		} else {
+			String currentLetters = "";
+			for (int i = 0; i < puzzle.length(); i++) {
+				currentLetters = currentLetters + boxes.get(i).getText();
+			}
+			if (puzzle.equals(currentLetters)) {
+				loadNextPuzzle();
+			}
+		}
 	}
 
 	void createBoxes() {
