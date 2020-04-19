@@ -4,7 +4,10 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.Stack;
+import java.util.function.UnaryOperator;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -13,23 +16,34 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import examples.FileHelper;
+
 public class Hangman extends KeyAdapter {
 
 	Stack<String> puzzles = new Stack<String>();
 	ArrayList<JLabel> boxes = new ArrayList<JLabel>();
 	int lives = 9;
 	JLabel livesLabel = new JLabel("" + lives);
-	
+
 	public static void main(String[] args) {
 		Hangman hangman = new Hangman();
 		hangman.addPuzzles();
 		hangman.createUI();
 	}
 
+	public List<String> loadWords() {
+		return FileHelper.loadFileContentsIntoArrayList("resource/words.txt");
+	}
+	
 	private void addPuzzles() {
-		puzzles.push("defenestrate");
-		puzzles.push("fancypants");
-		puzzles.push("elements");
+//		puzzles.push("defenestrate");
+//		puzzles.push("fancypants");
+//		puzzles.push("elements");
+
+		// use word list - remove special characters and spaces and convert to lower case characters.
+		puzzles.addAll(loadWords());
+		UnaryOperator<String> lowcase = (x) -> x.replaceAll("[^a-zA-Z0-9 ]", "").toLowerCase();
+        puzzles.replaceAll(lowcase);
 	}
 
 	JPanel panel = new JPanel();
@@ -51,7 +65,12 @@ public class Hangman extends KeyAdapter {
 		removeBoxes();
 		lives = 9;
 		livesLabel.setText("" + lives);
-		puzzle = puzzles.pop();
+
+		// Generate random word from list for next puzzle
+		Random generator = new Random();
+		int randomIndex = generator.nextInt(puzzles.size());
+		puzzle = puzzles.push(puzzles.get(randomIndex));
+
 		System.out.println("puzzle is now " + puzzle);
 		createBoxes();
 	}
@@ -59,9 +78,25 @@ public class Hangman extends KeyAdapter {
 	public void keyTyped(KeyEvent arg0) {
 		System.out.println(arg0.getKeyChar());
 		updateBoxesWithUserInput(arg0.getKeyChar());
-		if (lives == 0) {
+
+		// check if puzzle is solved
+		// output guessed word as string
+		String guess = "";
+		for (int j = 0; j < boxes.size(); j++) {
+			guess += boxes.get(j).getText();
+		}
+
+		if (guess.contains(puzzle)) {
+			System.out.println("Congratulations! You solved the puzzle. Please wait for a new puzzle to load.");
 			playDeathKnell();
 			loadNextPuzzle();
+		}
+		// did not solve puzzle - ran out of lives
+		else if (lives == 0) {
+			//playDeathKnell();
+			//loadNextPuzzle();
+			System.out.println("Game Over. You have ran out of lives.");
+			System.exit(0);
 		}
 	}
 
@@ -75,15 +110,7 @@ public class Hangman extends KeyAdapter {
 		}
 		if (!gotOne) {
 			livesLabel.setText("" + --lives);
-			return;
-		} else {
-			String currentLetters = "";
-			for (int i = 0; i < puzzle.length(); i++) {
-				currentLetters = currentLetters + boxes.get(i).getText();
-			}
-			if (puzzle.equals(currentLetters)) {
-				loadNextPuzzle();
-			}
+			System.out.println("There are no " + keyChar + ". Try again.");
 		}
 	}
 
@@ -115,7 +142,4 @@ public class Hangman extends KeyAdapter {
 	}
 
 }
-
-
-
 
