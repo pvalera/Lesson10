@@ -22,5 +22,6 @@ class PalindromeTest {
 	@Test
 	void testPalindrome() {
 		assertTrue(testPalindrome.isPalindrome("racecar"));
+		assertFalse(testPalindrome.isPalindrome("program"));
 	}
 }
