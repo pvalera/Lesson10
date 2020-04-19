@@ -18,14 +18,16 @@ public class Palindrome {
 	}
 	
 	public boolean isPalindrome(String word) {
-		String reversedString = "";
-		for (int i = word.length() - 1; i>= 0; i--) {
-			reversedString = reversedString + word.charAt(i);
+		boolean palindromeFlag = true;
+		int j = word.length() - 1;
+
+		// compare each character forward vs backward
+		for (int i = 0; i <= j; i++) {
+			if (word.charAt(i) != word.charAt(j-i)) {
+				palindromeFlag = false;
+			}
 		}
-		
-		if (word.equals(reversedString)) {
-			return true;
-		}
-		return false;
+
+		return palindromeFlag;
 	}
 }
