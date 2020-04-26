@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.Stack;
 import java.util.function.UnaryOperator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -36,14 +38,16 @@ public class Hangman extends KeyAdapter {
 	}
 	
 	private void addPuzzles() {
-//		puzzles.push("defenestrate");
-//		puzzles.push("fancypants");
-//		puzzles.push("elements");
+		puzzles.push("defenestrate");
+		puzzles.push("fancypants");
+		puzzles.push("elements");
 
-		// use word list - remove special characters and spaces and convert to lower case characters.
-		puzzles.addAll(loadWords());
-		UnaryOperator<String> lowcase = (x) -> x.replaceAll("[^a-zA-Z0-9 ]", "").toLowerCase();
-        puzzles.replaceAll(lowcase);
+//		// use word list
+//		puzzles.addAll(loadWords());
+		
+//		remove special characters and spaces and convert to lower case characters
+//		UnaryOperator<String> lowcase = (x) -> x.replaceAll("[^a-zA-Z0-9 ]", "").toLowerCase();
+//      puzzles.replaceAll(lowcase);
 	}
 
 	JPanel panel = new JPanel();
@@ -64,17 +68,34 @@ public class Hangman extends KeyAdapter {
 	private void loadNextPuzzle() {
 		removeBoxes();
 		lives = 9;
-		livesLabel.setText("" + lives);
+		livesLabel.setText("" + lives);		
 
-		// Generate random word from list for next puzzle
-		Random generator = new Random();
-		int randomIndex = generator.nextInt(puzzles.size());
-		puzzle = puzzles.push(puzzles.get(randomIndex));
+		// repeat process of loading puzzle until word does not contain special characters 
+		boolean isNotValid = false;
+		do {
+			isNotValid = false;
+			try {				
+				// generate random word from the list
+				Random generator = new Random();
+				int randomIndex = generator.nextInt(puzzles.size());
+				puzzle = puzzles.push(puzzles.get(randomIndex).toLowerCase());
+				System.out.println("Puzzle is now " + puzzle + ".");
 
-		System.out.println("puzzle is now " + puzzle);
+				// check if word contains special characters
+			    Pattern p = Pattern.compile("^[a-zA-Z]+$");
+			    Matcher m = p.matcher(puzzle);
+			    if (!m.find()) {
+			    	throw new Exception("Puzzle has special characters.");
+			    }
+			} catch (Exception e) {
+				System.out.println("*** Puzzle " + puzzle + " has special characters. Please wait for new puzzle to load.");
+				isNotValid = true;
+			}
+		} while (isNotValid);
+
 		createBoxes();
-	}
-
+	}	
+	
 	public void keyTyped(KeyEvent arg0) {
 		System.out.println(arg0.getKeyChar());
 		updateBoxesWithUserInput(arg0.getKeyChar());
@@ -93,8 +114,6 @@ public class Hangman extends KeyAdapter {
 		}
 		// did not solve puzzle - ran out of lives
 		else if (lives == 0) {
-			//playDeathKnell();
-			//loadNextPuzzle();
 			System.out.println("Game Over. You have ran out of lives.");
 			System.exit(0);
 		}
@@ -110,7 +129,7 @@ public class Hangman extends KeyAdapter {
 		}
 		if (!gotOne) {
 			livesLabel.setText("" + --lives);
-			System.out.println("There are no " + keyChar + ". Try again.");
+			System.out.println("There are no \"" + keyChar + "\". Try again.");
 		}
 	}
 
